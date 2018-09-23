@@ -74,8 +74,9 @@ class Window(Frame):
         skip_days_input_label = Label(text='Select days that there is no school(ie PD Days, Holidays, etc)')
         skip_days_input_label.place(x=1, y=325)
 
-        self.title_input.place(x=1, y=350)
-        self.title_input_label.place(x=1, y=340)
+        # working on placing these
+        # self.title_input.place(x=1, y=350)
+        # self.title_input_label.place(x=1, y=340)
 
     @staticmethod
     def client_exit():
