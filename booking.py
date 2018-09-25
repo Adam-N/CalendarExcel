@@ -1,7 +1,8 @@
 from tkinter import *
+import datetime
+
 import xlsxwriter
 from tkcalendar import Calendar, DateEntry
-import datetime
 
 
 class Window(Frame):
@@ -19,7 +20,7 @@ class Window(Frame):
         # initializing for putting the start day for the calendar.
         self.start_date_input = Calendar(font='Arial 10', showweeknumbers=False)
         self.skip_days_input = Calendar(font='Arial 10', showweeknumbers=False)
-        self.skip_days_input.place(x=25, y=350)
+        self.skip_days_input.place(x=25, y=375)
         self.skip_days_input.bind("<<CalendarSelected>>", self.date_add)
 
         self.skip_days = []
@@ -67,16 +68,18 @@ class Window(Frame):
         start_date_label.place(x=1, y=100)
 
         # placing the input for teacher names and it's label.
-        self.teach_input.place(x=150, y=1)
+        self.teach_input.place(x=150, y=25)
         teach_input_label = Label(text='Teachers Names: ')
-        teach_input_label.place(x=1, y=1)
+        teach_input_label.place(x=1, y=25)
 
-        skip_days_input_label = Label(text='Select days that there is no school(ie PD Days, Holidays, etc)')
+        skip_days_input_label = Label(
+            text='Select days that there is no school(ie PD Days, Holidays, etc) '
+                 '\n When you click on a date it will be added, to remove it click it again.')
         skip_days_input_label.place(x=1, y=325)
 
-        # working on placing these
-        # self.title_input.place(x=1, y=350)
-        # self.title_input_label.place(x=1, y=340)
+        self.title_input.place(x=150, y=1)
+        self.title_input_label.place(x=1, y=1)
+        self.title_input.insert(END, 'Lab Booking')
 
     @staticmethod
     def client_exit():
