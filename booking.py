@@ -142,11 +142,7 @@ class Window(Frame):
     # generates the excel spreadsheet.
     def generate(self):
         # Create a workbook and add a worksheet.
-        try:
-            workbook = xlsxwriter.Workbook('{}.xlsx'.format(self.title_input.get()))
-        except PermissionError:
-            messagebox.showinfo(message='There has been an error. Try closing the excel spreadsheet and trying again.')
-            return 'None'
+        workbook = xlsxwriter.Workbook('{}.xlsx'.format(self.title_input.get()))
         link_page = workbook.add_worksheet('Link Page')
         worksheet = workbook.add_worksheet("Week1")
         self.start_date = datetime.datetime.strptime(self.start_date_input.get_date(), '%Y-%m-%d')
@@ -229,13 +225,13 @@ class Window(Frame):
                                                 date_format,
                                                 '{}'.format(self.regular_date(self, second_date_link_page)))
                     link_page_row += 1
-                week += 1
 
                 # adds link to first page with all the links to pages.
                 # worksheet.merge_range(11, 0, 11, 5, "")
                 worksheet.write_url('A12', "internal:'Link Page'!A1", bold_format, "First Page")
 
         # creates new worksheet for the next week.
+        week += 1
         worksheet = workbook.add_worksheet('Week{}'.format(week))
 
         # Adds two to account for the weekend.
@@ -315,7 +311,12 @@ class Window(Frame):
             period_row = 2
 
         link_page.activate()
-        workbook.close()
+        try:
+            workbook.close()
+
+        except PermissionError:
+            messagebox.showinfo(message='There has been an error. Try closing the excel spreadsheet and trying again.')
+            return 'None'
         messagebox.showinfo(message='Completed. Thank you!')
 
 
