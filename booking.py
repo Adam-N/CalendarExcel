@@ -59,7 +59,7 @@ class Window(Frame):
         period_input_label.place(x=1, y=50)
 
         # button to run the generate the spreadsheet.
-        generate_button = Button(self, text='Generate', command=self.generate)
+        generate_button = Button(self, text='Generate', command=self.open_window)
         generate_button.place(x=250, y=590)
 
         # placing the calendar to pick start date.
@@ -103,6 +103,12 @@ class Window(Frame):
         n = self.start_date.toordinal()
         return n - offset
 
+    def display_dates(self):
+        date_list = []
+        for dates in self.skip_days:
+            date_list.append(self.regular_date(self, dates))
+            dates_list_label = Label(text=date_list, wraplength=225, justify='center').place(x=275, y=425)
+
     # converts from an excel epoch time to datetime.
     @staticmethod
     def regular_date(self, date):
@@ -130,14 +136,18 @@ class Window(Frame):
         added_date = self.excel_date_skip_list()
         if added_date in self.skip_days:
             self.skip_days.remove(added_date)
+            self.display_dates()
             return
         if added_date not in self.skip_days:
             self.skip_days.append(added_date)
+            self.display_dates()
 
     def open_window(self):
         repeating_window = Toplevel(root)
-        Button(text='+').pack()
-        Button(text='+').pack()
+        Label(repeating_window, text='Repeating Schedule').pack()
+        button_plus_row = Button(repeating_window, text='+').pack()
+        button_plus_col = Button(repeating_window, text='+').pack()
+        repeating_window.geometry("300x400")
 
     # generates the excel spreadsheet.
     def generate(self):
@@ -323,7 +333,7 @@ class Window(Frame):
 root = Tk()
 
 # size of the window
-root.geometry("400x625")
+root.geometry("500x625")
 root.resizable(FALSE, FALSE)
 app = Window(root)
 root.mainloop()
