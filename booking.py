@@ -37,6 +37,10 @@ class Window(Frame):
 
         # for day cycle amount
         self.day_cycle = Spinbox(from_=1, to=8, wrap=True)
+        self.day_cycle_window = 1
+
+        self.schedule_day_full = {}
+        self.repeating_window_cycle = 1
 
         # testing start date entry
         self.master = master
@@ -73,8 +77,8 @@ class Window(Frame):
         teach_input_label.place(x=1, y=25)
 
         skip_days_input_label = Label(
-            text='Select days that there is no school(ie PD Days, Holidays, etc) '
-                 '\n When you click on a date it will be added, to remove it click it again.')
+            text=' Select days that there is no school(ie PD Days, Holidays, etc) '
+                 '\n When you click on a date it will be added, to remove it click it again.', justify='left')
         skip_days_input_label.place(x=1, y=325)
 
         self.title_input.place(x=150, y=1)
@@ -103,6 +107,7 @@ class Window(Frame):
         n = self.start_date.toordinal()
         return n - offset
 
+    # displays the dates beside the calendar used to pick dates with no school.
     def display_dates(self):
         date_list = []
         for dates in self.skip_days:
@@ -143,11 +148,87 @@ class Window(Frame):
             self.display_dates()
 
     def open_window(self):
-        repeating_window = Toplevel(root)
-        Label(repeating_window, text='Repeating Schedule').pack()
-        button_plus_row = Button(repeating_window, text='+').pack()
-        button_plus_col = Button(repeating_window, text='+').pack()
-        repeating_window.geometry("300x400")
+        self.repeating_window = Toplevel(root)
+        repating_sched_label = Label(self.repeating_window,
+                                     text='Repeating Schedule for Day {}'.format(self.day_cycle_window)).grid(row=1,
+                                                                                                              column=1)
+        self.p1_input = Entry(self.repeating_window)
+        self.p2_input = Entry(self.repeating_window)
+        self.p3_input = Entry(self.repeating_window)
+        self.p4_input = Entry(self.repeating_window)
+        self.p5_input = Entry(self.repeating_window)
+        self.p6_input = Entry(self.repeating_window)
+        self.p7_input = Entry(self.repeating_window)
+        self.p8_input = Entry(self.repeating_window)
+
+        self.repeating_window.geometry("300x200+300+300")
+        placement_y = 2
+        next_day_button = Button(self.repeating_window, text='Next Day', command=self.next_day).grid(row=19, column=2)
+
+        for i in range(1, int(self.period_input.get()) + 1):
+            period_label_new_window = Label(self.repeating_window, text='Period {}'.format(i)).grid(row=placement_y,
+                                                                                                    column=1)
+            if i == 1:
+                self.p1_input.grid(row=placement_y, column=2)
+                self.p1_input.insert(END, "Name:")
+
+            if i == 2:
+                self.p2_input.grid(row=placement_y, column=2)
+                self.p2_input.insert(END, "Name:")
+
+            if i == 3:
+                self.p3_input.grid(row=placement_y, column=2)
+                self.p3_input.insert(END, "Name:")
+
+            if i == 4:
+                self.p4_input.grid(row=placement_y, column=2)
+                self.p4_input.insert(END, "Name:")
+
+            if i == 5:
+                self.p5_input.grid(row=placement_y, column=2)
+                self.p5_input.insert(END, "Name:")
+
+            if i == 6:
+                self.p6_input.grid(row=placement_y, column=2)
+                self.p6_input.insert(END, "Name:")
+
+            if i == 7:
+                self.p7_input.grid(row=placement_y, column=2)
+                self.p7_input.insert(END, "Name:")
+
+            if i == 8:
+                self.p8_input.grid(row=placement_y, column=2)
+                self.p8_input.insert(END, "Name:")
+
+            placement_y += 2
+
+    def next_day(self):
+        print('day_cycle {}'.format(self.day_cycle_window))
+        print(self.day_cycle.get())
+        self.schedule_day = {1: self.p1_input.get(), 2: self.p2_input.get(), 3: self.p3_input.get(),
+                             4: self.p4_input.get(), 5: self.p5_input.get(), 6: self.p6_input.get(),
+                             7: self.p7_input.get(), 8: self.p8_input.get()}
+
+        for i in range(1, len(self.schedule_day) + 1):
+            if self.schedule_day.get(i) == 'Name:' or self.schedule_day.get(i) == '':
+                self.schedule_day.update({i: 'default'})
+            i += 1
+        self.schedule_day_full[self.repeating_window_cycle] = self.schedule_day
+        self.repeating_window_cycle += 1
+        self.day_cycle_window += 1
+        self.repeating_window.destroy()
+        self.open_window()
+
+        if self.day_cycle_window == int(self.day_cycle.get()) + 1:
+            self.repeating_window.destroy()
+            print(self.schedule_day_full)
+            self.generate()
+            self.day_cycle_window = 1
+            self.schedule_day_full = {}
+            self.repeating_window_cycle = 1
+            return 'None'
+
+
 
     # generates the excel spreadsheet.
     def generate(self):
