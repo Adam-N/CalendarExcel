@@ -17,7 +17,6 @@ class Window(Frame):
         # initializing for putting the start day for the calendar.
         self.start_date_input = Calendar(font='Arial 10', showweeknumbers=False)
         self.skip_days_input = Calendar(font='Arial 10', showweeknumbers=False)
-        self.skip_days_input.place(x=25, y=375)
         self.skip_days_input.bind("<<CalendarSelected>>", self.date_add)
 
         self.skip_days = []
@@ -25,8 +24,6 @@ class Window(Frame):
         # variable for the start date
         self.start_date = datetime.datetime
 
-        # Label for an alert if the first day is not a monday
-        self.no_monday_label = Label(text='Please choose Monday as your starting day.')
         self.teach_names = ""
         self.teach_input = Entry(textvariable=self.teach_names, width=20)
 
@@ -42,11 +39,15 @@ class Window(Frame):
         self.schedule_day_full = {}
         self.repeating_window_cycle = 1
 
-        # testing start date entry
+        week_counter_default = StringVar()
+        week_counter_default.set("44")
+        self.week_counter = Spinbox(from_=1, to=52, wrap=True, textvariable=week_counter_default)
+        self.week_counter_label = Label(text='Number of weeks:')
+
         self.master = master
         self.init_window()
 
-    # Creation of init_window
+    # Creation of window
     def init_window(self):
         # changing the title of our master widget
         self.master.title("Computer Lab Booking Generator")
@@ -67,9 +68,10 @@ class Window(Frame):
         generate_button.place(x=250, y=590)
 
         # placing the calendar to pick start date.
-        self.start_date_input.place(x=25, y=125)
+        self.start_date_input.place(x=25, y=150)
+        self.skip_days_input.place(x=25, y=375)
         start_date_label = Label(text='Please select a day to start your schedule on.')
-        start_date_label.place(x=1, y=100)
+        start_date_label.place(x=1, y=125)
 
         # placing the input for teacher names and it's label.
         self.teach_input.place(x=150, y=25)
@@ -77,9 +79,8 @@ class Window(Frame):
         teach_input_label.place(x=1, y=25)
 
         skip_days_input_label = Label(
-            text=' Select days that there is no school(ie PD Days, Holidays, etc) '
-                 '\n When you click on a date it will be added, to remove it click it again.', justify='left')
-        skip_days_input_label.place(x=1, y=325)
+            text=' Select days that there is no school(ie PD Days, Holidays, etc) ', justify='left')
+        skip_days_input_label.place(x=1, y=350)
 
         self.title_input.place(x=150, y=1)
         self.title_input_label.place(x=1, y=1)
@@ -88,6 +89,17 @@ class Window(Frame):
         self.day_cycle.place(x=150, y=75, width=30)
         day_cycle_label = Label(text='Number of days in a cycle:')
         day_cycle_label.place(x=1, y=73)
+
+        # Check box. Will show the day on each date if checked.
+        self.show_day_number_check = IntVar()
+        show_day_number = Checkbutton(root, text="Show day number on each day",
+                                      variable=self.show_day_number_check, onvalue=1, offvalue=0,
+                                      height=1, width=25)
+        show_day_number.place(x=1, y=557)
+
+        # Spinbox for selecting how many weeks the program will run for
+        self.week_counter.place(x=150, y=100, width=30)
+        self.week_counter_label.place(x=1, y=100)
 
     @staticmethod
     def client_exit():
@@ -122,14 +134,6 @@ class Window(Frame):
         final_date = datetime.datetime.strftime(datetime.datetime.fromordinal(new_date), '%b %d %Y')
         return final_date
 
-    # checks to see if the date you picked was a monday
-    def monday_check(self):
-        self.start_date = datetime.datetime.strptime(self.start_date_input.get_date(), '%Y-%m-%d')
-        if self.start_date.isoweekday() == 1:
-            return True
-        elif self.start_date.isoweekday() != 1:
-            return False
-
     # makes a list of teachers names that was input into the GUI.
     def make_teach_list(self):
         self.teach_names = self.teach_input.get()
@@ -147,6 +151,7 @@ class Window(Frame):
             self.skip_days.append(added_date)
             self.display_dates()
 
+    # Opens window for modifying each day individually.
     def open_window(self):
         self.repeating_window = Toplevel(root)
         repating_sched_label = Label(self.repeating_window,
@@ -202,9 +207,8 @@ class Window(Frame):
 
             placement_y += 2
 
+    # Brings up the next day, and stores the values into a dict.
     def next_day(self):
-        print('day_cycle {}'.format(self.day_cycle_window))
-        print(self.day_cycle.get())
         self.schedule_day = {1: self.p1_input.get(), 2: self.p2_input.get(), 3: self.p3_input.get(),
                              4: self.p4_input.get(), 5: self.p5_input.get(), 6: self.p6_input.get(),
                              7: self.p7_input.get(), 8: self.p8_input.get()}
@@ -221,14 +225,11 @@ class Window(Frame):
 
         if self.day_cycle_window == int(self.day_cycle.get()) + 1:
             self.repeating_window.destroy()
-            print(self.schedule_day_full)
             self.generate()
             self.day_cycle_window = 1
             self.schedule_day_full = {}
             self.repeating_window_cycle = 1
             return 'None'
-
-
 
     # generates the excel spreadsheet.
     def generate(self):
@@ -245,6 +246,8 @@ class Window(Frame):
 
         # Starts Weeks at num 1
         week = 1
+
+        day = 1
 
         # getting the excel epoch time for the start date.
         start_date_excel = self.excel_date()
@@ -267,7 +270,9 @@ class Window(Frame):
         link_page.set_column(0, 0, width=15)
         link_page.set_column(1, 1, width=30)
 
-        if not self.monday_check():
+        # Checks to see if the start day falls between a monday and friday.
+        if self.start_date.isoweekday() <= 5:
+
             # title for the week.
             worksheet.write(0, 0, 'Week {}'.format(week))
 
@@ -279,6 +284,7 @@ class Window(Frame):
             for q in range(self.start_date.isoweekday(), 6):
                 worksheet.write(row, col, start_date_excel, date_format)
                 worksheet.set_column(col, col, 18, center_format)
+
                 # checks if this is the first day of the week.
                 if q == self.start_date.isoweekday():
                     first_date_link_page = start_date_excel
@@ -296,11 +302,25 @@ class Window(Frame):
 
                 # formats cells to use a list provided by user.
                 if start_date_excel not in self.skip_days:
-                    worksheet.data_validation(period_row, col, period_row + period_number, col + 1,
-                                              {'validate': 'list', 'source': [self.teach_names]})
+                    period = 1
+                    for j in range(0, period_number - 1):
+                        if int(self.day_cycle.get()) == 1 or day > int(self.day_cycle.get()):
+                            day = 1
+                        if self.schedule_day_full[day][period] == 'default':
+                            if self.teach_names:
+                                worksheet.data_validation(period_row - 1, col, period_row, col,
+                                                          {'validate': 'list', 'source': [self.teach_names]})
+                            period_row += 1
+                            period += 1
+                        else:
+                            worksheet.write(period_row - 1, col, self.schedule_day_full[day][period])
+                            period_row += 1
+                            period += 1
+                    if self.show_day_number_check.get() == 1:
+                        worksheet.write(period_row, col, "Day {}".format(day))
 
-                # iterates variables
                 col += 1
+                day += 1
                 start_date_excel += 1
                 q += 1
 
@@ -318,22 +338,29 @@ class Window(Frame):
                     link_page_row += 1
 
                 # adds link to first page with all the links to pages.
-                # worksheet.merge_range(11, 0, 11, 5, "")
                 worksheet.write_url('A12', "internal:'Link Page'!A1", bold_format, "First Page")
 
-        # creates new worksheet for the next week.
-        week += 1
-        worksheet = workbook.add_worksheet('Week{}'.format(week))
+            # creates new worksheet for the next week.
+            week += 1
+            worksheet = workbook.add_worksheet('Week{}'.format(week))
 
-        # Adds two to account for the weekend.
-        start_date_excel += 2
+            # Adds two to account for the weekend.
+            start_date_excel += 2
 
-        # Resets variables for the next round. Because they need to be back in the same cells.
-        row = 1
-        col = 1
-        period_row = 2
+            # Resets variables for the next round. Because they need to be back in the same cells.
+            row = 1
+            col = 1
+            period_row = 2
 
-        for r in range(1, 44):
+        #if the day picked is a saturday or sunday.
+        elif self.start_date.isoweekday() == 6:
+            start_date_excel += 2
+
+        elif self.start_date.isoweekday() == 7:
+            start_date_excel += 1
+
+        # This is for all the following weeks.
+        for r in range(1, int(self.week_counter.get())):
             # title for the week.
             worksheet.write(0, 0, 'Week {}'.format(week))
 
@@ -362,13 +389,29 @@ class Window(Frame):
 
                 # formats cells to use a list provided by user.
                 if start_date_excel not in self.skip_days:
-                    worksheet.data_validation(period_row, col, period_row + period_number, col + 1,
-                                              {'validate': 'list', 'source': [self.teach_names]})
+                    period = 1
+                    if int(self.day_cycle.get()) == 1 or day > int(self.day_cycle.get()):
+                        day = 1
+
+                    for j in range(0, period_number - 1):
+                        if self.schedule_day_full[day][period] == 'default':
+                            if self.teach_names:
+                                worksheet.data_validation(period_row - 1, col, period_row, col,
+                                                          {'validate': 'list', 'source': [self.teach_names]})
+                            period_row += 1
+                            period += 1
+                        else:
+                            worksheet.write(period_row - 1, col, self.schedule_day_full[day][period])
+                            period_row += 1
+                            period += 1
+                    if self.show_day_number_check.get() == 1:
+                        worksheet.write(period_row, col, "Day {}".format(day))
 
                 # iterates variables
                 col += 1
                 start_date_excel += 1
                 i += 1
+                day += 1
 
                 # Adds internal link so that you can navigate from the first page of the document.
                 if i == 4:
@@ -409,6 +452,7 @@ class Window(Frame):
             messagebox.showinfo(message='There has been an error. Try closing the excel spreadsheet and trying again.')
             return 'None'
         messagebox.showinfo(message='Completed. Thank you!')
+        self.client_exit()
 
 
 root = Tk()
