@@ -256,9 +256,11 @@ class Window(Frame):
         center_format = workbook.add_format()
         colour_format = workbook.add_format()
         bold_format = workbook.add_format()
+        justify_format = workbook.add_format()
         center_format.set_center_across()
         colour_format.set_bg_color('red')
         bold_format.set_bold(True)
+        justify_format.set_align('left')
 
         # variables to format the period cells.
         period_row = 2
@@ -313,11 +315,11 @@ class Window(Frame):
                             period_row += 1
                             period += 1
                         else:
-                            worksheet.write(period_row - 1, col, self.schedule_day_full[day][period])
+                            worksheet.write(period_row - 1, col, self.schedule_day_full[day][period], justify_format)
                             period_row += 1
                             period += 1
                     if self.show_day_number_check.get() == 1:
-                        worksheet.write(period_row, col, "Day {}".format(day))
+                        worksheet.write(period_row, col, "Day {}".format(day), justify_format)
 
                 col += 1
                 day += 1
@@ -371,7 +373,7 @@ class Window(Frame):
 
             for i in range(0, 5):
                 worksheet.write(row, col, start_date_excel, date_format)
-                worksheet.set_column(col, col, 18, center_format)
+                worksheet.set_column(col, col, 18, justify_format)
                 # checks if this is the first day of the week.
                 if i == 0:
                     first_date_link_page = start_date_excel
