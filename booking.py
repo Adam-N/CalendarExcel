@@ -314,15 +314,17 @@ class Window(Frame):
                                                           {'validate': 'list', 'source': [self.teach_names]})
                             period_row += 1
                             period += 1
+
                         else:
                             worksheet.write(period_row - 1, col, self.schedule_day_full[day][period], justify_format)
                             period_row += 1
                             period += 1
+
+
                     if self.show_day_number_check.get() == 1:
                         worksheet.write(period_row, col, "Day {}".format(day), justify_format)
-
+                    day += 1
                 col += 1
-                day += 1
                 start_date_excel += 1
                 q += 1
 
@@ -392,28 +394,31 @@ class Window(Frame):
                 # formats cells to use a list provided by user.
                 if start_date_excel not in self.skip_days:
                     period = 1
-                    if int(self.day_cycle.get()) == 1 or day > int(self.day_cycle.get()):
-                        day = 1
 
                     for j in range(0, period_number - 1):
+                        if int(self.day_cycle.get()) == 1 or day > int(self.day_cycle.get()):
+                            day = 1
+
                         if self.schedule_day_full[day][period] == 'default':
                             if self.teach_names:
                                 worksheet.data_validation(period_row - 1, col, period_row, col,
                                                           {'validate': 'list', 'source': [self.teach_names]})
                             period_row += 1
                             period += 1
+
                         else:
                             worksheet.write(period_row - 1, col, self.schedule_day_full[day][period])
                             period_row += 1
                             period += 1
+
                     if self.show_day_number_check.get() == 1:
                         worksheet.write(period_row, col, "Day {}".format(day))
+                    day += 1
 
                 # iterates variables
                 col += 1
                 start_date_excel += 1
                 i += 1
-                day += 1
 
                 # Adds internal link so that you can navigate from the first page of the document.
                 if i == 4:
